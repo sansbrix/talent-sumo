@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0012_alter_interaction_channel_1_and_more'),
+        ("backend", "0012_alter_interaction_channel_1_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='candidate',
-            name='name',
+            model_name="candidate",
+            name="name",
             field=models.CharField(default=None, max_length=255),
         ),
     ]

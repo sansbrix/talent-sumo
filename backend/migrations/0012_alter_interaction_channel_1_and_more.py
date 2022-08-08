@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0011_alter_interaction_candidate_feedback'),
+        ("backend", "0011_alter_interaction_candidate_feedback"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='interaction',
-            name='channel_1',
+            model_name="interaction",
+            name="channel_1",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='interaction',
-            name='channel_2',
+            model_name="interaction",
+            name="channel_2",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
     ]

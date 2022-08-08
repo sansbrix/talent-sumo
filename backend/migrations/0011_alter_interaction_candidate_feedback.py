@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0010_candidate_access_code'),
+        ("backend", "0010_candidate_access_code"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='interaction',
-            name='candidate_feedback',
+            model_name="interaction",
+            name="candidate_feedback",
             field=models.CharField(blank=True, default=None, max_length=255, null=True),
         ),
     ]
