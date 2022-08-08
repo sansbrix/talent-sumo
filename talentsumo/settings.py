@@ -1,6 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
-
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-8r6xcydy@je#dmw^y60qla-tl^o+(r@5xk#48c(z@n14ajr4u-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -73,9 +73,9 @@ WSGI_APPLICATION = 'talentsumo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        "NAME" : 'talentsumo',
-        "USER" : 'root',
-        "PASSWORD" : "",
+        "NAME" : 'wczdmkrc_talentsumo',
+        "USER" : 'wczdmkrc_talentsumo',
+        "PASSWORD" : "talentsumotalentsumo",
         'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }
