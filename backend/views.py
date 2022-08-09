@@ -5,7 +5,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework.pagination import LimitOffsetPagination
 from .serializer import (CandidateSerializer, ChangePasswordSerializer,
                          FetchTestSerializer, NotificationSerializer,
                          QuestionSerializer, ResponseSerializer,
@@ -52,7 +52,7 @@ class ChangePasswordView(generics.UpdateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CreateTestView(APIView):
+class CreateTestView(APIView, LimitOffsetPagination):
     permission_classes = (IsAuthenticated,)
 
     def add_fields_in_question(self, data):
@@ -105,8 +105,9 @@ class CreateTestView(APIView):
                 )
         else:
             instance = Test.objects.filter(createdby=self.request.user)
-            data = TestSerializer(instance=instance, many=True).data
-            return Response(data=data, status=status.HTTP_200_OK)
+            results = self.paginate_queryset(instance, request, view=self)
+            data = TestSerializer(results, many=True).data
+            return self.get_paginated_response(data)
 
 
 class ValidateAccessCode(generics.RetrieveAPIView):
@@ -129,7 +130,7 @@ class ValidateAccessCode(generics.RetrieveAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class InteractionView(APIView):
+class InteractionView(APIView, LimitOffsetPagination):
     permission_classes = (IsAuthenticated,)
 
     @swagger_auto_schema(request_body=CandidateSerializer)
@@ -153,8 +154,9 @@ class InteractionView(APIView):
                 candidates = Candidate.objects.filter(
                     access_code=test.first().access_code
                 )
-                serializer = CandidateSerializer(instance=candidates, many=True)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                results = self.paginate_queryset(candidates, request, view=self)
+                serializer = CandidateSerializer(results, many=True)
+                return self.get_paginated_response(serializer.data)
             else:
                 return Response(
                     {"status": False, "message": "No Test is available with this ID"},

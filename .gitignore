@@ -1,0 +1,8 @@
+tmp/**
+stderr.log
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+./backend/__pycache__/**
