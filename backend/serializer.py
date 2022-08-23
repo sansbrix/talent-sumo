@@ -1,8 +1,15 @@
 from dataclasses import fields
 from os import access
 
-from backend.models import (Candidate, Interaction, Notification, Question,
-                            Response, Test)
+from backend.models import (
+    Candidate,
+    Interaction,
+    Notification,
+    Question,
+    Response,
+    Test,
+    UserDetail,
+)
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
@@ -11,12 +18,24 @@ from pyexpat import model
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 
+from .utils import create_user_invite_code
+
 
 # Register serializer
 class RegisterSerializer(serializers.ModelSerializer):
+    invitation_code = serializers.CharField(required=False, write_only=True)
+
     class Meta:
         model = User
-        fields = ("id", "username", "password", "first_name", "last_name", "email")
+        fields = (
+            "id",
+            "username",
+            "password",
+            "first_name",
+            "last_name",
+            "email",
+            "invitation_code",
+        )
         extra_kwargs = {
             "password": {"write_only": True},
         }
@@ -28,6 +47,17 @@ class RegisterSerializer(serializers.ModelSerializer):
             first_name=validated_data["first_name"],
             last_name=validated_data["last_name"],
             email=validated_data["email"],
+        )
+        code = (
+            validated_data["invitation_code"]
+            if validated_data.get("invitation_code")
+            else None
+        )
+        UserDetail.objects.create(
+            user=user,
+            invite_code=create_user_invite_code(),
+            invitation_code=code,
+            invitation_code_optional=True if code else False,
         )
         return user
 
@@ -146,3 +176,6 @@ class InteractionSerializer(serializers.ModelSerializer):
             "candidate": {"read_only": True},
             "interaction": {"read_only": True},
         }
+
+class OutputCSVToAISerializer(serializers.Serializer):
+    file = serializers.FileField()

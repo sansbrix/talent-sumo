@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
+
 # Create your models here.
 from django.dispatch import receiver
 from django.urls import reverse
@@ -147,6 +148,21 @@ class Response(models.Model):
     is_active = models.BooleanField(default=True)
     # createdby_id
     # updatedby_id
+
+
+class UserDetail(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    invitation_code = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="This code tell us which user is invite this user.",
+    )
+    invitation_code_optional = models.BooleanField(default=False)
+    invite_code = models.CharField(
+        max_length=255,
+        help_text="This is the code with that user can invite the other user.",
+    )
 
 
 @receiver(reset_password_token_created)

@@ -2,15 +2,24 @@ from backend.models import Candidate, Notification, Test
 from django.contrib.auth.models import User
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
-from .serializer import (CandidateSerializer, ChangePasswordSerializer,
-                         FetchTestSerializer, NotificationSerializer,
-                         QuestionSerializer, ResponseSerializer,
-                         TestSerializer, ValidateAccessCodeSerializer)
 
+from backend.utils import CreateCSVForInputAI, output_csv_ai
+from .serializer import (
+    CandidateSerializer,
+    ChangePasswordSerializer,
+    FetchTestSerializer,
+    NotificationSerializer,
+    OutputCSVToAISerializer,
+    QuestionSerializer,
+    ResponseSerializer,
+    TestSerializer,
+    ValidateAccessCodeSerializer,
+)
+from django.templatetags.static import static
 
 # Create your views here.
 class ChangePasswordView(generics.UpdateAPIView):
@@ -164,3 +173,39 @@ class InteractionView(APIView, LimitOffsetPagination):
                 )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class InputCSVToAIViewSet(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            obj = CreateCSVForInputAI()
+            path = obj.create_csv()
+            return Response({
+                "path": request.build_absolute_uri('/media/output.csv'),
+                "status": True
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "message": "Something went wrong. Contact administrator",
+                "status": False,
+                "exception": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+            
+class OutputCSVToAIViewSet(APIView):
+    permission_classes = (AllowAny,)
+    @swagger_auto_schema(request_body=OutputCSVToAISerializer)
+    def post(self, request, *args, **kwargs):
+        serializers = OutputCSVToAISerializer(data=request.FILES)
+        if serializers.is_valid():
+            if(output_csv_ai(request.FILES['file'])):
+                return Response({
+                    "message": "Your file has been uploaded to DB",
+                    "status": True
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                "message": "Something went wrong. Contact administrator",
+                "status": False,
+            }, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)

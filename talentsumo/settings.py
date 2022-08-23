@@ -73,9 +73,9 @@ WSGI_APPLICATION = "talentsumo.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "wczdmkrc_talentsumo",
-        "USER": "wczdmkrc_talentsumo",
-        "PASSWORD": "talentsumotalentsumo",
+        "NAME": "talentsumo",
+        "USER": "root",
+        "PASSWORD": "",
         "HOST": "localhost",  # Or an IP Address that your DB is hosted on
         "PORT": "3306",
     }
@@ -129,12 +129,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        # "rest_framework_simplejwt.authentication.JWTAuthentication",
+        # "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10    # the size of one page
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,  # the size of one page
 }
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=10),
@@ -179,3 +179,6 @@ EMAIL_HOST_PASSWORD = "jpfzjtlnhpysiubv"  # past the key or password app here
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "iamkarantalwar@gmail.com"
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'data') # 'data' is my media folder
+MEDIA_URL = '/media/'

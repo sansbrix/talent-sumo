@@ -1,5 +1,11 @@
-from backend.views import (ChangePasswordView, CreateTestView, InteractionView,
-                           ValidateAccessCode)
+from backend.views import (
+    ChangePasswordView,
+    CreateTestView,
+    InputCSVToAIViewSet,
+    InteractionView,
+    OutputCSVToAIViewSet,
+    ValidateAccessCode,
+)
 from django.urls import include, path, re_path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
@@ -49,4 +55,6 @@ urlpatterns = [
     path("interview", CreateTestView.as_view()),
     path("validate-access-code", ValidateAccessCode.as_view()),
     path("interaction", InteractionView.as_view()),
+    path("input-ai-csv", InputCSVToAIViewSet.as_view()),
+    path("output-ai-csv", OutputCSVToAIViewSet.as_view())
 ]

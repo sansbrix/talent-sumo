@@ -1,0 +1,8 @@
+,Interaction_ID,Candidate_ID,Test_ID,Track,Interaction_Mode,Description,Question_ID,Question,Answer_Format,Base_Scoring,Content_Scoring,Response,Ideal_answer
+0,1,14,26,track,interaction_mode,job_describtion,1,Question 1,Audio,True,,ABC,Audio.mp3
+1,2,15,26,track,interaction_mode,job_describtion,1,Question 1,Audio,True,,ABC,Audio.mp3
+2,3,16,26,track,interaction_mode,job_describtion,1,Question 1,Audio,True,,ABC,Audio.mp3
+3,4,17,26,track,interaction_mode,job_describtion,1,Question 1,Audio,True,,ABC,Audio.mp3
+4,5,18,26,track,interaction_mode,job_describtion,1,Question 1,Audio,True,,ABC,Audio.mp3
+5,6,19,26,track,interaction_mode,job_describtion,1,Question 1,Audio,True,,ABC,Audio.mp3
+6,7,20,26,track,interaction_mode,job_describtion,1,Question 1,Audio,True,,ABC,Audio.mp3
