@@ -1,3 +1,4 @@
+from tkinter import CASCADE
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
@@ -184,3 +185,54 @@ def password_reset_token_created(
         # to:
         [reset_password_token.user.email],
     )
+class Score(models.Model):
+    interaction = models.ForeignKey(Interaction,on_delete=models.CASCADE)
+    mcq_percentage = models.CharField(max_length=400)
+    manager_quotient_percentile = models.CharField(max_length=400)
+    leadership_quotient_percentile = models.CharField(max_length=400)
+    learner_quotient_percentile = models.CharField(max_length=400)
+    people_quotient = models.CharField(max_length=400)
+    resume_score = models.CharField(max_length=500)
+    video_estimated_gesture_score = models.CharField(max_length=400)
+    interaction_percentile = models.CharField(max_length=400)
+
+
+class AudioScore(models.Model):
+    score = models.ForeignKey(Score,on_delete=models.CASCADE)
+    audio_sales_quotient = models.CharField(max_length=400)
+    audio_manager_quotient = models.CharField(max_length=400)
+    audio_leadership_quotient = models.CharField(max_length=400)
+    audio_learner_quotient = models.CharField(max_length=400)
+    audio_sales_quotient_percentile = models.CharField(max_length=400)
+    audio_people_qutient_percentile = models.CharField(max_length=400)
+    audio_pace = models.CharField(max_length=600)
+    audio_pitch = models.CharField(max_length=600)
+    audio_power_word_density = models.CharField(max_length=600)
+    audio_word_cloud = models.CharField(max_length=600)
+    audio_volume = models.CharField(max_length=600)
+    audio_aggregate_content_score = models.CharField(max_length=400) 
+    audio_raw_interaction_score = models.CharField(max_length=400) 
+    audio_interaction_score = models.CharField(max_length=400)
+    audio_energy = models.CharField(max_length=400)
+
+class AudioScorePerQuestion(models.Model):
+    audio_score = models.ForeignKey(AudioScore,on_delete=models.CASCADE)
+    question = models.ForeignKey(Question,on_delete=models.CASCADE)
+    audio_transcript = models.CharField(max_length=500)
+    audio_confidence = models.CharField(max_length=500)
+    audio_fluency = models.CharField(max_length=500)
+    grammer_score = models.CharField(max_length=500)
+    audio_content_score = models.CharField(max_length=400)
+    audio_per_question_content_score = models.CharField(max_length=400)
+    audio_silence_number = models.CharField(max_length=400)
+    audio_silence_length = models.CharField(max_length=400)
+    audio_filler_words_score = models.CharField(max_length=400)
+    audio_sentiment_score = models.CharField(max_length=400)
+
+class ScorePerQuestion(models.Model):
+    mcq_value = models.CharField(max_length=400)
+    video_likeability = models.CharField(max_length=400)
+    video_charm = models.CharField(max_length=400)
+
+class TextScorePerQuestion(models.Model):
+    question_grammer_score = models.CharField(max_length=400)    
