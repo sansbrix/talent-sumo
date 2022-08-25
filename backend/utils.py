@@ -62,12 +62,8 @@ class CreateCSVForInputAI(object):
         dataFrame.to_csv("./data/output.csv")
         
             
-
-def output_csv_ai(file): 
-    print(file)
-    return True
-
 def output_csv_ai(file):
+    print(file)
     FILE_PATH = io.StringIO(file.read().decode('utf-8'))
     df = pd.read_csv(FILE_PATH)
     first_row = df.columns
@@ -75,18 +71,9 @@ def output_csv_ai(file):
     file.columns = file.columns.str.strip()
     file.columns = file.columns.str.replace("_", " ")
     file = file.drop(file.columns[42:], axis=1)
+    print(file)
     for item, data in file.iterrows():
         response = dict(data)
-        Candidate.objects.create(
-            candidate_id = response["Candidate ID"]
-        )
-        Interaction.objects.create(
-            interation_id = response["Interaction id"]
-        )
-        Test.objects.create(
-            test_id = response["Test id"],
-            interaction_mode = response["Interaction Mode"]
-        )
         Score.objects.create(
             interaction_mode = response["MCQ Percentage"],
             manager_quotient_percentile = response["Manager Quotient Percentile"],
@@ -128,9 +115,6 @@ def output_csv_ai(file):
         )
         TextScorePerQuestion.objects.create(
             question_grammer_score = response["Grammer Score Per Question"],            
-        )
-        Question.objects.create(
-            question_id = response["Question No"]
         )
         ScorePerQuestion.objects.create(
             mcq_value = response["MCQ Value"],
