@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
-
+from django.core.files.storage import FileSystemStorage
 from backend.utils import CreateCSVForInputAI, output_csv_ai
 from .serializer import (
     CandidateSerializer,
@@ -197,7 +197,11 @@ class OutputCSVToAIViewSet(APIView):
     def post(self, request, *args, **kwargs):
         serializers = OutputCSVToAISerializer(data=request.FILES)
         if serializers.is_valid():
-            if(output_csv_ai(request.FILES['file'])):
+            request_file = request.FILES['file'] if 'file' in request.FILES else None
+            fs = FileSystemStorage()
+            file = fs.save(request_file.name, request_file)
+            fileurl = request.build_absolute_uri(fs.url(file))
+            if(output_csv_ai(fileurl)):
                 return Response({
                     "message": "Your file has been uploaded to DB",
                     "status": True

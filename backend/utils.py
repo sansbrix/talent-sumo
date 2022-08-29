@@ -4,6 +4,8 @@ import io
 from django.http import response
 import random
 import pandas as pd
+
+
 def create_user_invite_code():
     fixed_digits = 6
     code = random.randrange(111111, 999999, fixed_digits)
@@ -63,19 +65,17 @@ class CreateCSVForInputAI(object):
         
             
 def output_csv_ai(file):
-    print(file)
-    FILE_PATH = io.StringIO(file.read().decode('utf-8'))
-    df = pd.read_csv(FILE_PATH)
+    FILE_PATH = file
+    df = pd.read_csv(FILE_PATH, delim_whitespace=True,error_bad_lines=False, engine="python")
     first_row = df.columns
     file = pd.read_csv(FILE_PATH, skiprows=1)
     file.columns = file.columns.str.strip()
     file.columns = file.columns.str.replace("_", " ")
     file = file.drop(file.columns[42:], axis=1)
-    print(file)
     for item, data in file.iterrows():
         response = dict(data)
-        Score.objects.create(
-            interaction_mode = response["MCQ Percentage"],
+        score = Score.objects.create(
+            interaction_id = response["Interaction id"],
             manager_quotient_percentile = response["Manager Quotient Percentile"],
             leadership_quotient_percentile = response["Leadership Quotient Percentile"],
             learner_quotient_percentile = response["Learner Quotient percentile"],
@@ -84,7 +84,8 @@ def output_csv_ai(file):
             video_estimated_gesture_score = response["Estimated Gesture score"],
             interaction_percentile = response["Interaction percentile"]             
         )
-        AudioScore.objects.create(
+        audio = AudioScore.objects.create(
+            score = score,
             audio_sales_quotient = response["Sales Quotient"],
             audio_manager_quotient = response["Manager Quotient"],
             audio_leadership_quotient = response["Leadership Quotient"],
@@ -92,16 +93,18 @@ def output_csv_ai(file):
             audio_sales_quotient_percentile = response["Sales Quotient Percentile"],
             audio_people_qutient_percentile = response["People Quotient Percentile"],
             audio_pace = response["Pace"],
-            audio_power_word_density = response["audio_power_word_density"],
+            audio_power_word_density = response["Power word density"],
             audio_word_cloud = response["Word Cloud"],
             audio_volume = response["Volume"],
             audio_pitch = response["Pitch"],
             audio_aggregate_content_score = response["Aggregate content score"],
-            audio_raw_interaction_score = response["Rawteraction score"],
+            audio_raw_interaction_score = response["Raw interaction score"],
             audio_interaction_score = response["Interaction score"],
             audio_energy = response["Energy"],    
         )
         AudioScorePerQuestion.objects.create(
+            question_id =response["Question No."],
+            audio_score = audio,
             grammer_score = response["Grammer score"],
             audio_transcript = response["Transcript"],
             audio_confidence = response["Confidence"],
