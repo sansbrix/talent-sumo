@@ -10,7 +10,8 @@ from django_rest_passwordreset.signals import reset_password_token_created
 from pyexpat import model
 
 from talentsumo import env
-
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 # Test Model
 class Test(models.Model):
@@ -185,8 +186,19 @@ def password_reset_token_created(
         # to:
         [reset_password_token.user.email],
     )
+
+
+def email_notification_for_mcq_tests(sender, instance, *args, **kwargs):
+    subject = "Thank you for attempting the test | TalentSumo"
+    html_message = render_to_string("email_notification_for_mcq.html", {"context": "values"})
+    plain_message = strip_tags(html_message)
+    from_email = "From <from@example.com>"
+    to = "to@example.com"
+    send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+
+
 class Score(models.Model):
-    interaction = models.ForeignKey(Interaction,on_delete=models.CASCADE)
+    interaction = models.ForeignKey(Interaction, on_delete=models.CASCADE)
     mcq_percentage = models.CharField(max_length=400)
     manager_quotient_percentile = models.CharField(max_length=400)
     leadership_quotient_percentile = models.CharField(max_length=400)
@@ -195,10 +207,11 @@ class Score(models.Model):
     resume_score = models.CharField(max_length=500)
     video_estimated_gesture_score = models.CharField(max_length=400)
     interaction_percentile = models.CharField(max_length=400)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
 
 class AudioScore(models.Model):
-    score = models.ForeignKey(Score,on_delete=models.CASCADE)
+    score = models.ForeignKey(Score, on_delete=models.CASCADE)
     audio_sales_quotient = models.CharField(max_length=400)
     audio_manager_quotient = models.CharField(max_length=400)
     audio_leadership_quotient = models.CharField(max_length=400)
@@ -210,14 +223,14 @@ class AudioScore(models.Model):
     audio_power_word_density = models.CharField(max_length=600)
     audio_word_cloud = models.CharField(max_length=600)
     audio_volume = models.CharField(max_length=600)
-    audio_aggregate_content_score = models.CharField(max_length=400) 
-    audio_raw_interaction_score = models.CharField(max_length=400) 
+    audio_aggregate_content_score = models.CharField(max_length=400)
+    audio_raw_interaction_score = models.CharField(max_length=400)
     audio_interaction_score = models.CharField(max_length=400)
     audio_energy = models.CharField(max_length=400)
 
+
 class AudioScorePerQuestion(models.Model):
-    audio_score = models.ForeignKey(AudioScore,on_delete=models.CASCADE)
-    question = models.ForeignKey(Question,on_delete=models.CASCADE)
+    audio_score = models.ForeignKey(AudioScore, on_delete=models.CASCADE)
     audio_transcript = models.CharField(max_length=500)
     audio_confidence = models.CharField(max_length=500)
     audio_fluency = models.CharField(max_length=500)
@@ -229,10 +242,14 @@ class AudioScorePerQuestion(models.Model):
     audio_filler_words_score = models.CharField(max_length=400)
     audio_sentiment_score = models.CharField(max_length=400)
 
+
 class ScorePerQuestion(models.Model):
+    score = models.ForeignKey(Score, on_delete=models.CASCADE)
     mcq_value = models.CharField(max_length=400)
     video_likeability = models.CharField(max_length=400)
     video_charm = models.CharField(max_length=400)
 
+
 class TextScorePerQuestion(models.Model):
-    question_grammer_score = models.CharField(max_length=400)    
+    score = models.ForeignKey(Score, on_delete=models.CASCADE)
+    question_grammer_score = models.CharField(max_length=400)

@@ -17,7 +17,7 @@ class RegisterApi(generics.GenericAPIView):
             if request.data.get("invitation_code"):
                 code_exist = (
                     UserDetail.objects.filter(
-                    invite_code=request.data["invitation_code"]
+                        invite_code=request.data["invitation_code"]
                     ).count()
                     > 0
                 )

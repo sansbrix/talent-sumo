@@ -6,13 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0016_scoreperquestion_textscoreperquestion'),
+        ("backend", "0016_scoreperquestion_textscoreperquestion"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='audioscore',
-            old_name='audio_aggregate_content_scoe',
-            new_name='audio_aggregate_content_score',
+            model_name="audioscore",
+            old_name="audio_aggregate_content_scoe",
+            new_name="audio_aggregate_content_score",
         ),
     ]

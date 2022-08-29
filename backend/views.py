@@ -1,4 +1,4 @@
-from backend.models import Candidate, Notification, Test
+from backend.models import Candidate, Notification, Score, Test
 from django.contrib.auth.models import User
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
@@ -15,6 +15,7 @@ from .serializer import (
     NotificationSerializer,
     OutputCSVToAISerializer,
     QuestionSerializer,
+    ReportSerializer,
     ResponseSerializer,
     TestSerializer,
     ValidateAccessCodeSerializer,
@@ -174,42 +175,72 @@ class InteractionView(APIView, LimitOffsetPagination):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class InputCSVToAIViewSet(APIView):
     def post(self, request, *args, **kwargs):
         try:
             obj = CreateCSVForInputAI()
             path = obj.create_csv()
-            return Response({
-                "path": request.build_absolute_uri('/media/output.csv'),
-                "status": True
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    "path": request.build_absolute_uri("/media/output.csv"),
+                    "status": True,
+                },
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
-            return Response({
-                "message": "Something went wrong. Contact administrator",
-                "status": False,
-                "exception": str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
-            
-            
+            return Response(
+                {
+                    "message": "Something went wrong. Contact administrator",
+                    "status": False,
+                    "exception": str(e),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
 class OutputCSVToAIViewSet(APIView):
     permission_classes = (AllowAny,)
+
     @swagger_auto_schema(request_body=OutputCSVToAISerializer)
     def post(self, request, *args, **kwargs):
         serializers = OutputCSVToAISerializer(data=request.FILES)
         if serializers.is_valid():
-            request_file = request.FILES['file'] if 'file' in request.FILES else None
+            request_file = request.FILES["file"] if "file" in request.FILES else None
             fs = FileSystemStorage()
             file = fs.save(request_file.name, request_file)
             fileurl = request.build_absolute_uri(fs.url(file))
-            if(output_csv_ai(fileurl)):
-                return Response({
-                    "message": "Your file has been uploaded to DB",
-                    "status": True
-                }, status=status.HTTP_200_OK)
+            if output_csv_ai(fileurl):
+                return Response(
+                    {"message": "Your file has been uploaded to DB", "status": True},
+                    status=status.HTTP_200_OK,
+                )
             else:
-                return Response({
-                "message": "Something went wrong. Contact administrator",
-                "status": False,
-            }, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "message": "Something went wrong. Contact administrator",
+                        "status": False,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         else:
             return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ReportView(generics.RetrieveAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ReportSerializer
+
+    def retrieve(self, request, intrectionId, *args, **kwargs):
+        instance = ReportSerializer(
+            instance=Score.objects.filter(id=1)
+            .select_related("interaction")
+            .prefetch_related(
+                "audioscore_set",
+                "audioscore_set__audioscoreperquestion_set",
+                "scoreperquestion_set",
+                "textscoreperquestion_set",
+            ),
+            many=True,
+        )
+        return Response(instance.data, status=status.HTTP_200_OK)

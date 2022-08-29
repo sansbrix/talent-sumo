@@ -180,5 +180,5 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "iamkarantalwar@gmail.com"
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'data') # 'data' is my media folder
-MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "data")  # 'data' is my media folder
+MEDIA_URL = "/media/"

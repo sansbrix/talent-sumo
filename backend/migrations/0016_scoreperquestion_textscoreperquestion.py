@@ -6,24 +6,40 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend', '0015_audioscore_score_audioscoreperquestion_and_more'),
+        ("backend", "0015_audioscore_score_audioscoreperquestion_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ScorePerQuestion',
+            name="ScorePerQuestion",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('mcq_value', models.CharField(max_length=400)),
-                ('video_likeability', models.CharField(max_length=400)),
-                ('video_charm', models.CharField(max_length=400)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("mcq_value", models.CharField(max_length=400)),
+                ("video_likeability", models.CharField(max_length=400)),
+                ("video_charm", models.CharField(max_length=400)),
             ],
         ),
         migrations.CreateModel(
-            name='TextScorePerQuestion',
+            name="TextScorePerQuestion",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('question_grammer_score', models.CharField(max_length=400)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("question_grammer_score", models.CharField(max_length=400)),
             ],
         ),
     ]
