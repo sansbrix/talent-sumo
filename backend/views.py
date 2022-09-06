@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
 from django.core.files.storage import FileSystemStorage
 from backend.utils import CreateCSVForInputAI, output_csv_ai
+from drf_yasg.openapi import Schema, TYPE_OBJECT, TYPE_STRING, TYPE_ARRAY
 from .serializer import (
     CandidateSerializer,
     ChangePasswordSerializer,
@@ -21,7 +22,8 @@ from .serializer import (
     ValidateAccessCodeSerializer,
 )
 from django.templatetags.static import static
-
+from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
 # Create your views here.
 class ChangePasswordView(generics.UpdateAPIView):
     """
@@ -64,20 +66,23 @@ class ChangePasswordView(generics.UpdateAPIView):
 
 class CreateTestView(APIView, LimitOffsetPagination):
     permission_classes = (IsAuthenticated,)
-
-    def add_fields_in_question(self, data):
+    test_response = openapi.Response('Interview Response Description', TestSerializer(many=True))
+    
+    def add_fields_in_question(self, data, type_="create"):
         output = []
         for i in data["questions"]:
-            i["createdby"] = self.request.user.id
-            i["updatedby"] = self.request.user.id
+            i["updatedby"] = self.request.user.id  
+            if type_ != "create":
+                i["createdby"] = self.request.user.id   
             output.append(i)
         return output
 
-    def add_fields_in_notifications(self, data):
+    def add_fields_in_notifications(self, data, type_="create"):
         notifications = data["notification"]
         output = []
         for i in notifications:
-            i["createdby"] = self.request.user.id
+            if type_ != "create":
+                i["createdby"] = self.request.user.id   
             i["updatedby"] = self.request.user.id
             output.append(i)
         return output
@@ -101,23 +106,59 @@ class CreateTestView(APIView, LimitOffsetPagination):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(query_serializer=FetchTestSerializer)
+    @swagger_auto_schema(responses={200: test_response})
     def get(self, request, *args, **kwargs):
-        if self.request.GET.get("id"):
-            instance = Test.objects.filter(id=self.request.GET.get("id"))
-            if instance.count() > 0:
-                data = TestSerializer(instance=instance.last()).data
-                return Response(data=data, status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    {"status": False, "message": "No Test Found"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-        else:
-            instance = Test.objects.filter(createdby=self.request.user)
-            results = self.paginate_queryset(instance, request, view=self)
-            data = TestSerializer(results, many=True).data
-            return self.get_paginated_response(data)
+        instance = Test.objects.filter(createdby=self.request.user)
+        results = self.paginate_queryset(instance, request, view=self)
+        data = TestSerializer(results, many=True).data
+        return self.get_paginated_response(data)
+        
+
+class ReterieveTestView(generics.RetrieveAPIView, generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TestSerializer
+    queryset = Test.objects.all()
+
+    def retrieve(self, request, interviewId, *args, **kwargs):
+        instance =  get_object_or_404(Test, pk=interviewId)
+        instance = TestSerializer(instance=instance)
+        return Response(instance.data, status=status.HTTP_200_OK)
+    
+    def update(self, request, interviewId, *args, **kwargs):
+        test_object = get_object_or_404(Test, pk=interviewId)
+        self.instance_data = TestSerializer(instance=test_object).data
+        data = request.data
+        data["questions"] = self.add_fields_in_question(request.data, type_="update")
+        data["notification"] = self.add_fields_in_notifications(request.data, type_="update")
+        data["total_question"] = self.get_total_questions(request.data)
+        data["createdby"] = test_object.createdby.id
+        data["updatedby"] = self.request.user.id
+       
+        serializer = TestSerializer(data=data, instance=test_object ,context={'request': self.request})
+        if serializer.is_valid():
+            serializer.update(instance=test_object, validated_data=data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def add_fields_in_question(self, data, type_="create"):
+        output = []
+        for i in data["questions"]:        
+            i["updatedby"] = self.request.user.id  
+            i["createdby"] = self.request.user.id   
+            output.append(i)
+        return output
+
+    def add_fields_in_notifications(self, data, type_="create"):
+        notifications = data["notification"]
+        output = []
+        for i in notifications:
+            i["createdby"] = self.request.user.id   
+            i["updatedby"] = self.request.user.id
+            output.append(i)
+        return output
+
+    def get_total_questions(self, data):
+        return len(data["questions"])
 
 
 class ValidateAccessCode(generics.RetrieveAPIView):
@@ -230,6 +271,7 @@ class OutputCSVToAIViewSet(APIView):
 class ReportView(generics.RetrieveAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ReportSerializer
+    queryset = Score.objects.all()
 
     def retrieve(self, request, intrectionId, *args, **kwargs):
         instance = ReportSerializer(

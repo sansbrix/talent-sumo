@@ -1,5 +1,6 @@
 from ctypes import Array
 from dataclasses import fields
+from operator import mod
 from os import access
 
 from backend.models import (
@@ -23,7 +24,6 @@ from django.db import models
 from pyexpat import model
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
-
 from .utils import create_user_invite_code
 
 
@@ -90,6 +90,12 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = "__all__"
 
+class QuestionResponseSerializer(serializers.ModelSerializer):
+    question = QuestionSerializer(read_only=True)
+    class Meta:
+        model = Response
+        fields = "__all__"
+    
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -121,8 +127,47 @@ class TestSerializer(serializers.ModelSerializer):
 
         for i in notification:
             Notification.objects.create(**i, test=test)
+            break
 
         return test
+    
+    def update_test_object(self, instance, validated_data):
+        Test.objects.filter(id=instance.id).update(**validated_data)
+        
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        questions = validated_data.pop("questions")
+        notification = validated_data.pop("notification")
+        
+        self.update_test_object(instance, validated_data)
+        
+        questions_updated_ids = []
+        for i in questions:
+            if i.get("id") is None:
+                Question.objects.create(**i)
+            else: 
+                Question.objects.filter(id=i.get("id")).update(**i)
+                questions_updated_ids.append(i.get("id"))
+                
+        # Delete the questions that are not coming
+        questions_not_coming = Question.objects.filter(test=instance).values_list("id", flat=True)
+        intersection = set(questions_not_coming).difference(questions_updated_ids)
+        Question.objects.filter(id__in=intersection).delete()
+        
+        notification_ = Notification.objects.filter(test=instance).first()
+        for i in notification:
+            if notification_ is None:
+                i.pop("test")
+                i["test"] = instance
+                i["createdby"] = user
+                i["updatedby"] = user
+                Notification.objects.create(**i)
+            else:
+                Notification.objects.filter(id=i.get("id")).update(**i)
+                
+            break
+
+        return instance
 
 
 class FetchTestSerializer(serializers.Serializer):
@@ -206,7 +251,9 @@ class ReportSerializer(serializers.ModelSerializer):
     volume = serializers.SerializerMethodField()  # audio_volume
     pitch = serializers.SerializerMethodField()  # audio_pitch
     content_score = serializers.SerializerMethodField()  # audio_aggregate_content_score
-    questions = serializers.SerializerMethodField()
+    # questions = serializers.SerializerMethodField(source="question")
+    questions = type('SerializerMethodField', (serializers.SerializerMethodField, QuestionResponseSerializer), dict())(
+        help_text="Get Questions List") 
     # sales_qoutient
     # pace
 
@@ -259,8 +306,8 @@ class ReportSerializer(serializers.ModelSerializer):
         question_ids = Score.objects.filter(interaction=obj.interaction).values_list(
             "question_id", flat=True
         )
-        return QuestionSerializer(
-            instance=Question.objects.filter(id__in=[question_ids]), many=True
+        return QuestionResponseSerializer(
+            instance=Response.objects.all(), many=True
         ).data
 
     class Meta:

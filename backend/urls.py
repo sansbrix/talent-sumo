@@ -5,6 +5,7 @@ from backend.views import (
     InteractionView,
     OutputCSVToAIViewSet,
     ReportView,
+    ReterieveTestView,
     ValidateAccessCode,
 )
 from django.urls import include, path, re_path
@@ -54,6 +55,7 @@ urlpatterns = [
     ),
     # Interview
     path("interview", CreateTestView.as_view()),
+    path("interview/<str:interviewId>", ReterieveTestView.as_view()),
     path("validate-access-code", ValidateAccessCode.as_view()),
     path("interaction", InteractionView.as_view()),
     path("input-ai-csv", InputCSVToAIViewSet.as_view()),

@@ -89,6 +89,11 @@ def output_csv_ai(file):
                 video_estimated_gesture_score=response["Estimated Gesture score"],
                 interaction_percentile=response["Interaction percentile"],
                 question_id=response["Question No."],
+                likeability_aggregate=response["Likeability aggregate"],
+                charm_aggregate=response["Charm aggregate"],
+                confidence_aggregate=response["Confidence aggregate"],
+                energy_aggregate=response["Energy aggregate"],
+                fluency_agreegate=response["Fluency agreegate"],
             )
             audio = AudioScore.objects.create(
                 score=score,

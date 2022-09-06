@@ -190,7 +190,9 @@ def password_reset_token_created(
 
 def email_notification_for_mcq_tests(sender, instance, *args, **kwargs):
     subject = "Thank you for attempting the test | TalentSumo"
-    html_message = render_to_string("email_notification_for_mcq.html", {"context": "values"})
+    html_message = render_to_string(
+        "email_notification_for_mcq.html", {"context": "values"}
+    )
     plain_message = strip_tags(html_message)
     from_email = "From <from@example.com>"
     to = "to@example.com"
@@ -208,6 +210,21 @@ class Score(models.Model):
     video_estimated_gesture_score = models.CharField(max_length=400)
     interaction_percentile = models.CharField(max_length=400)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    likeability_aggregate = models.CharField(
+        max_length=255, null=True, blank=True, default=None
+    )
+    charm_aggregate = models.CharField(
+        max_length=255, null=True, blank=True, default=None
+    )
+    fluency_agreegate = models.CharField(
+        max_length=255, null=True, blank=True, default=None
+    )
+    confidence_aggregate = models.CharField(
+        max_length=255, null=True, blank=True, default=None
+    )
+    energy_aggregate = models.CharField(
+        max_length=255, null=True, blank=True, default=None
+    )
 
 
 class AudioScore(models.Model):
