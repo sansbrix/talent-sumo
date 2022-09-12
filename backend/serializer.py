@@ -25,7 +25,7 @@ from pyexpat import model
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 from .utils import create_user_invite_code
-
+from rest_framework.validators import UniqueValidator
 
 # Register serializer
 class RegisterSerializer(serializers.ModelSerializer):
@@ -90,12 +90,14 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = "__all__"
 
+
 class QuestionResponseSerializer(serializers.ModelSerializer):
     question = QuestionSerializer(read_only=True)
+
     class Meta:
         model = Response
         fields = "__all__"
-    
+
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -130,30 +132,32 @@ class TestSerializer(serializers.ModelSerializer):
             break
 
         return test
-    
+
     def update_test_object(self, instance, validated_data):
         Test.objects.filter(id=instance.id).update(**validated_data)
-        
+
     def update(self, instance, validated_data):
-        user = self.context['request'].user
+        user = self.context["request"].user
         questions = validated_data.pop("questions")
         notification = validated_data.pop("notification")
-        
+
         self.update_test_object(instance, validated_data)
-        
+
         questions_updated_ids = []
         for i in questions:
             if i.get("id") is None:
                 Question.objects.create(**i)
-            else: 
+            else:
                 Question.objects.filter(id=i.get("id")).update(**i)
                 questions_updated_ids.append(i.get("id"))
-                
+
         # Delete the questions that are not coming
-        questions_not_coming = Question.objects.filter(test=instance).values_list("id", flat=True)
+        questions_not_coming = Question.objects.filter(test=instance).values_list(
+            "id", flat=True
+        )
         intersection = set(questions_not_coming).difference(questions_updated_ids)
         Question.objects.filter(id__in=intersection).delete()
-        
+
         notification_ = Notification.objects.filter(test=instance).first()
         for i in notification:
             if notification_ is None:
@@ -164,14 +168,14 @@ class TestSerializer(serializers.ModelSerializer):
                 Notification.objects.create(**i)
             else:
                 Notification.objects.filter(id=i.get("id")).update(**i)
-                
+
             break
 
         return instance
 
 
 class FetchTestSerializer(serializers.Serializer):
-    id = serializers.CharField(required=True)
+    search = serializers.CharField(required=False)
 
 
 class ValidateAccessCodeSerializer(serializers.Serializer):
@@ -252,8 +256,11 @@ class ReportSerializer(serializers.ModelSerializer):
     pitch = serializers.SerializerMethodField()  # audio_pitch
     content_score = serializers.SerializerMethodField()  # audio_aggregate_content_score
     # questions = serializers.SerializerMethodField(source="question")
-    questions = type('SerializerMethodField', (serializers.SerializerMethodField, QuestionResponseSerializer), dict())(
-        help_text="Get Questions List") 
+    questions = type(
+        "SerializerMethodField",
+        (serializers.SerializerMethodField, QuestionResponseSerializer),
+        dict(),
+    )(help_text="Get Questions List")
     # sales_qoutient
     # pace
 
@@ -313,3 +320,53 @@ class ReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Score
         fields = "__all__"
+
+
+class ProfileSerializer(serializers.Serializer):
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
+    phone_number = serializers.CharField(required=False)
+    institute_name = serializers.CharField(required=False)
+    country = serializers.CharField(required=False)
+    linkedin_url = serializers.CharField(required=False)
+    facebook_url = serializers.CharField(required=False)
+    twitter_url = serializers.CharField(required=False)
+    instagram_url = serializers.CharField(required=False)
+
+    def validate_email(self, attrs):
+        user = self.context["request"].user
+        user_ = User.objects.filter(email=attrs).exclude(id=user.id)
+        if user_.count() > 0:
+            raise serializers.ValidationError("This E-mail is already taken.")
+        return attrs
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        # Update User Model
+        User.objects.filter(id=user.id).update(
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            email=validated_data["email"],
+        )
+        UserDetail.objects.filter(user_id=user.id).update(
+            phone_number=validated_data["phone_number"],
+            institute_name=validated_data["institute_name"],
+            country=validated_data["country"],
+            linkedin_url=validated_data["linkedin_url"],
+            facebook_url=validated_data["facebook_url"],
+            twitter_url=validated_data["twitter_url"],
+            instagram_url=validated_data["instagram_url"],
+        )
+        return {
+            "first_name": validated_data["first_name"],
+            "last_name": validated_data["last_name"],
+            "email": validated_data["email"],
+            "phone_number": validated_data["phone_number"],
+            "institute_name": validated_data["institute_name"],
+            "country": validated_data["country"],
+            "linkedin_url": validated_data["linkedin_url"],
+            "facebook_url": validated_data["facebook_url"],
+            "twitter_url": validated_data["twitter_url"],
+            "instagram_url": validated_data["instagram_url"],
+        }

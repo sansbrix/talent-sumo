@@ -165,6 +165,17 @@ class UserDetail(models.Model):
         max_length=255,
         help_text="This is the code with that user can invite the other user.",
     )
+    phone_number = models.CharField(max_length=255, null=True, default=True, blank=True)
+    institute_name = models.CharField(
+        max_length=255, null=True, default=True, blank=True
+    )
+    country = models.CharField(max_length=255, null=True, default=True, blank=True)
+    linkedin_url = models.CharField(max_length=255, null=True, default=True, blank=True)
+    facebook_url = models.CharField(max_length=255, null=True, default=True, blank=True)
+    twitter_url = models.CharField(max_length=255, null=True, default=True, blank=True)
+    instagram_url = models.CharField(
+        max_length=255, null=True, default=True, blank=True
+    )
 
 
 @receiver(reset_password_token_created)
