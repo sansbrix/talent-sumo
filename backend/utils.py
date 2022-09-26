@@ -36,6 +36,7 @@ class CreateCSVForInputAI(object):
         self.output = []
 
     def prepare_object(self, obj: Interaction) -> List[dict]:
+        intraction_ids = []
         for i in Response.objects.filter(interaction=obj):
             self.obj = {
                 "Interaction_ID": obj.id,
@@ -54,6 +55,9 @@ class CreateCSVForInputAI(object):
             }
 
             self.output.append(self.obj)
+            intraction_ids.append(obj.id)
+        # update all the intreactions
+        Response.objects.filter(interaction_id__in=intraction_ids).update(status="in-progress")
 
     def create_csv(self):
         intrections = Interaction.objects.all()
@@ -70,11 +74,12 @@ def output_csv_ai(file):
         df = pd.read_csv(
             FILE_PATH, delim_whitespace=True, error_bad_lines=False, engine="python"
         )
-        first_row = df.columns
         file = pd.read_csv(FILE_PATH, skiprows=1)
         file.columns = file.columns.str.strip()
         file.columns = file.columns.str.replace("_", " ")
-        file = file.drop(file.columns[42:], axis=1)
+        file = file.drop(file.columns[48:], axis=1)
+
+        intraction_ids = []
         for item, data in file.iterrows():
             response = dict(data)
             score = Score.objects.create(
@@ -136,6 +141,10 @@ def output_csv_ai(file):
                 video_likeability=response["Likeability"],
                 video_charm=response["Charm"],
             )
+            intraction_ids.append(response["Interaction id"])
+
+        Response.objects.filter(interaction_id__in=intraction_ids).update(status="done")
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False

@@ -1,4 +1,4 @@
-from backend.models import Candidate, Notification, Score, Test, UserDetail
+from backend.models import Candidate, Interaction, Notification, Score, Test, UserDetail
 from django.contrib.auth.models import User
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
@@ -13,6 +13,7 @@ from .serializer import (
     CandidateSerializer,
     ChangePasswordSerializer,
     FetchTestSerializer,
+    IntrectionRatingSerializer,
     NotificationSerializer,
     OutputCSVToAISerializer,
     ProfileSerializer,
@@ -26,6 +27,12 @@ from django.templatetags.static import static
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from django.db.models import Q
+
+
+class TeamView(APIView):
+    def get(self, request):
+        return Response([])
+
 
 # Create your views here.
 class ChangePasswordView(generics.UpdateAPIView):
@@ -292,7 +299,7 @@ class ReportView(generics.RetrieveAPIView):
 
     def retrieve(self, request, intrectionId, *args, **kwargs):
         instance = ReportSerializer(
-            instance=Score.objects.filter(id=1)
+            instance=Score.objects.filter(interaction__id=intrectionId)
             .select_related("interaction")
             .prefetch_related(
                 "audioscore_set",
@@ -343,3 +350,32 @@ class ProfileView(APIView):
         }
 
         return Response(response, status=status.HTTP_200_OK)
+
+
+class InteractionRatingView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    @swagger_auto_schema(request_body=IntrectionRatingSerializer)
+    def post(self, request, intrectionId, *args, **kwargs):
+        serializer = IntrectionRatingSerializer(
+            data=request.data, context={"request": self.request}
+        )
+
+        if serializer.is_valid():
+            intraction = Interaction.objects.filter(id=intrectionId)
+            if intraction.count() > 0:
+                intraction.update(
+                    start_rating=request.data.get("start_rating"),
+                    rating_description=request.data.get("rating_description"),
+                )
+                return Response(
+                    data={"message": "Intraction updated successfully."},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    data={"message": "Intraction not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

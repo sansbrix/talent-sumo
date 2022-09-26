@@ -27,6 +27,12 @@ from rest_framework.permissions import IsAuthenticated
 from .utils import create_user_invite_code
 from rest_framework.validators import UniqueValidator
 
+
+class IntrectionRatingSerializer(serializers.Serializer):
+    start_rating = serializers.CharField()
+    rating_description = serializers.CharField()
+
+
 # Register serializer
 class RegisterSerializer(serializers.ModelSerializer):
     invitation_code = serializers.CharField(required=False, write_only=True)
@@ -212,7 +218,7 @@ class CandidateSerializer(serializers.ModelSerializer):
         interaction = Interaction.objects.create(
             candidate=candidate,
             test=test,
-            candidate_feedback=test,
+            candidate_feedback="",
             report_send_to_user=notification.report_send_to_user,
             channel_1=notification.report_sent_to_email_one,
             channel_2=notification.report_sent_to_email_two,

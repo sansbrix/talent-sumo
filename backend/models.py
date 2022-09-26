@@ -7,7 +7,7 @@ from django.db import models
 from django.dispatch import receiver
 from django.urls import reverse
 from django_rest_passwordreset.signals import reset_password_token_created
-from pyexpat import model
+from django.db.models.signals import post_save
 
 from talentsumo import env
 from django.template.loader import render_to_string
@@ -38,6 +38,9 @@ class Test(models.Model):
     collect_candidate_id = models.BooleanField()
     collect_voice_match = models.BooleanField()
     total_question = models.IntegerField()
+    mentor_name = models.CharField(max_length=255, default=None, null=True, blank=True)
+    insights = models.CharField(max_length=255, default=None, blank=True, null=True)
+    external_bot = models.BooleanField(default=True, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     createdby = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="test_craeted_by"
@@ -91,6 +94,10 @@ class Question(models.Model):
     createdby = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="question_craeted_by"
     )
+    media_link = models.CharField(max_length=255, null=True, default=None, blank=True)
+    question_context = models.CharField(
+        max_length=255, null=True, default=None, blank=True
+    )
     updated_at = models.DateTimeField(auto_now=True)
     updatedby = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="question_updated_by"
@@ -125,6 +132,10 @@ class Candidate(models.Model):
 
 
 class Interaction(models.Model):
+    start_rating = models.CharField(max_length=255, null=True, blank=True, default=None)
+    rating_description = models.CharField(
+        max_length=255, null=True, blank=True, default=None
+    )
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     candidate_feedback = models.CharField(
@@ -138,8 +149,13 @@ class Interaction(models.Model):
     is_active = models.BooleanField(default=True)
     # score_id =
     # individual_report_id=
+    
 
-
+STATUS_CHOICES = (
+    ("response-received", "response-received"),
+    ("in-progress", "in-progress"),
+    ("done", "done"),
+)
 class Response(models.Model):
     response = models.CharField(max_length=255)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -148,11 +164,15 @@ class Response(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    status = models.CharField(
+        choices=(STATUS_CHOICES), default="response-received", max_length=255
+    )
     # createdby_id
     # updatedby_id
 
 
 class UserDetail(models.Model):
+    user_type = models.CharField(max_length=255, null=True, blank=True, default=None)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     invitation_code = models.CharField(
         max_length=255,
@@ -197,17 +217,6 @@ def password_reset_token_created(
         # to:
         [reset_password_token.user.email],
     )
-
-
-def email_notification_for_mcq_tests(sender, instance, *args, **kwargs):
-    subject = "Thank you for attempting the test | TalentSumo"
-    html_message = render_to_string(
-        "email_notification_for_mcq.html", {"context": "values"}
-    )
-    plain_message = strip_tags(html_message)
-    from_email = "From <from@example.com>"
-    to = "to@example.com"
-    send_mail(subject, plain_message, from_email, [to], html_message=html_message)
 
 
 class Score(models.Model):
@@ -281,3 +290,15 @@ class ScorePerQuestion(models.Model):
 class TextScorePerQuestion(models.Model):
     score = models.ForeignKey(Score, on_delete=models.CASCADE)
     question_grammer_score = models.CharField(max_length=400)
+
+
+# @receiver(post_save, sender=Score, dispatch_uid="send_intrection_email")
+# def email_notification_for_mcq_tests(sender, instance, *args, **kwargs):
+#     subject = "Thank you for attempting the test | TalentSumo"
+#     html_message = render_to_string(
+#         "email_notification_for_mcq.html", {"instance": instance}
+#     )
+#     plain_message = strip_tags(html_message)
+#     from_email = "From <from@example.com>"
+#     to = "to@example.com"
+#     send_mail(subject, plain_message, from_email, [to], html_message=html_message)

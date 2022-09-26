@@ -2,12 +2,14 @@ from backend.views import (
     ChangePasswordView,
     CreateTestView,
     InputCSVToAIViewSet,
+    InteractionRatingView,
     InteractionView,
     OutputCSVToAIViewSet,
     ProfileView,
     ReportView,
     ReterieveTestView,
     SingleTestIntrectionView,
+    TeamView,
     ValidateAccessCode,
 )
 from django.urls import include, path, re_path
@@ -65,4 +67,6 @@ urlpatterns = [
     path("output-ai-csv", OutputCSVToAIViewSet.as_view()),
     path("report/<str:intrectionId>", ReportView.as_view()),
     path("profile", ProfileView.as_view()),
+    path("teams", TeamView.as_view()),
+    path("intrection-rating/<str:intrectionId>", InteractionRatingView.as_view()),
 ]
