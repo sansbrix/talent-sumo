@@ -1,17 +1,19 @@
+from operator import mod
 from tkinter import CASCADE
+
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
-
+from django.db.models.signals import post_save
 # Create your models here.
 from django.dispatch import receiver
+from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils.html import strip_tags
 from django_rest_passwordreset.signals import reset_password_token_created
-from django.db.models.signals import post_save
 
 from talentsumo import env
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
+
 
 # Test Model
 class Test(models.Model):
@@ -172,7 +174,6 @@ class Response(models.Model):
 
 
 class UserDetail(models.Model):
-    user_type = models.CharField(max_length=255, null=True, blank=True, default=None)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     invitation_code = models.CharField(
         max_length=255,
@@ -196,6 +197,13 @@ class UserDetail(models.Model):
     instagram_url = models.CharField(
         max_length=255, null=True, default=True, blank=True
     )
+    business_invite_code = models.CharField(max_length=255, null=True, default=None, blank=True, help_text="This is the code with that user signed up in the signup page.",)
+    number_of_interaction = models.CharField(max_length=255, null=True, default=None, blank=True)
+    number_of_responses = models.CharField(max_length=255, null=True, default=None, blank=True)
+    video_creator = models.BooleanField(null=True, default=None, blank=True)
+    external_bot_user = models.BooleanField(null=True, default=None, blank=True)
+    user_type = models.CharField(max_length=255, null=True, blank=True, default=None)
+    
 
 
 @receiver(reset_password_token_created)
@@ -302,3 +310,17 @@ class TextScorePerQuestion(models.Model):
 #     from_email = "From <from@example.com>"
 #     to = "to@example.com"
 #     send_mail(subject, plain_message, from_email, [to], html_message=html_message)
+
+class BusinessInvitationCode(models.Model):
+    invitation_code = models.CharField(max_length=255)
+    number_of_interaction = models.CharField(max_length=255)
+    number_of_responses_per_test = models.CharField(max_length=255)
+    employee = models.BooleanField()
+    expiry_date = models.CharField(max_length=255, null=True, blank=True)
+    external_bot_user = models.BooleanField()
+    video_creator = models.BooleanField()
+    team_user = models.BooleanField()
+    one_time_user = models.BooleanField()
+    user_type = models.CharField(max_length=255)
+    
+    

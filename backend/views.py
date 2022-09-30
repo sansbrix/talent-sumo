@@ -1,32 +1,27 @@
-from backend.models import Candidate, Interaction, Notification, Score, Test, UserDetail
 from django.contrib.auth.models import User
+from django.core.files.storage import FileSystemStorage
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from django.templatetags.static import static
+from drf_yasg import openapi
+from drf_yasg.openapi import TYPE_ARRAY, TYPE_OBJECT, TYPE_STRING, Schema
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.pagination import LimitOffsetPagination
-from django.core.files.storage import FileSystemStorage
+
+from backend.models import (Candidate, Interaction, Notification, Score, Test,
+                            UserDetail)
 from backend.utils import CreateCSVForInputAI, output_csv_ai
-from drf_yasg.openapi import Schema, TYPE_OBJECT, TYPE_STRING, TYPE_ARRAY
-from .serializer import (
-    CandidateSerializer,
-    ChangePasswordSerializer,
-    FetchTestSerializer,
-    IntrectionRatingSerializer,
-    NotificationSerializer,
-    OutputCSVToAISerializer,
-    ProfileSerializer,
-    QuestionSerializer,
-    ReportSerializer,
-    ResponseSerializer,
-    TestSerializer,
-    ValidateAccessCodeSerializer,
-)
-from django.templatetags.static import static
-from django.shortcuts import get_object_or_404
-from drf_yasg import openapi
-from django.db.models import Q
+
+from .serializer import (CandidateSerializer, ChangePasswordSerializer,
+                         FetchTestSerializer, IntrectionRatingSerializer,
+                         NotificationSerializer, OutputCSVToAISerializer,
+                         ProfileSerializer, QuestionSerializer,
+                         ReportSerializer, ResponseSerializer, TestSerializer,
+                         ValidateAccessCodeSerializer)
 
 
 class TeamView(APIView):

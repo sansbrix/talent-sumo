@@ -2,8 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import generics, mixins, permissions, status
 from rest_framework.response import Response
 
-from .models import UserDetail
-
+from .models import BusinessInvitationCode, UserDetail
 from .serializer import RegisterSerializer, UserSerializer
 
 
@@ -29,6 +28,18 @@ class RegisterApi(generics.GenericAPIView):
                         },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
+            # Check the business Invite Code
+            if request.data.get("business_invite_code"):
+                code_exist = BusinessInvitationCode.objects.filter(invitation_code = request.data["business_invite_code"]).count() > 0
+                if not code_exist:
+                    return Response(
+                        {
+                            "message": "This business invitation code doesn't exist.",
+                            "status": False,
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )                    
+                
         user = serializer.save()
         return Response(
             {

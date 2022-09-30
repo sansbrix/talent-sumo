@@ -3,20 +3,6 @@ from dataclasses import fields
 from operator import mod
 from os import access
 
-from backend.models import (
-    AudioScore,
-    AudioScorePerQuestion,
-    Candidate,
-    Interaction,
-    Notification,
-    Question,
-    Response,
-    Score,
-    ScorePerQuestion,
-    Test,
-    TextScorePerQuestion,
-    UserDetail,
-)
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
@@ -24,8 +10,14 @@ from django.db import models
 from pyexpat import model
 from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
-from .utils import create_user_invite_code
 from rest_framework.validators import UniqueValidator
+
+from backend.models import (AudioScore, AudioScorePerQuestion, Candidate,
+                            Interaction, Notification, Question, Response,
+                            Score, ScorePerQuestion, Test,
+                            TextScorePerQuestion, UserDetail)
+
+from .utils import create_user_invite_code
 
 
 class IntrectionRatingSerializer(serializers.Serializer):
@@ -36,7 +28,7 @@ class IntrectionRatingSerializer(serializers.Serializer):
 # Register serializer
 class RegisterSerializer(serializers.ModelSerializer):
     invitation_code = serializers.CharField(required=False, write_only=True)
-
+    business_invite_code = serializers.CharField(required=True, write_only=True)
     class Meta:
         model = User
         fields = (

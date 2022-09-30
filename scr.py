@@ -1,4 +1,6 @@
-import instaloader, profile
+import profile
+
+import instaloader
 
 # Get instance
 L = instaloader.Instaloader()

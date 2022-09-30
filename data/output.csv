@@ -1,9 +1,0 @@
-,Interaction_ID,Candidate_ID,Test_ID,Track,Interaction_Mode,Description,Question_ID,Question,Answer_Format,Base_Scoring,Content_Scoring,Response,Ideal_answer
-0,1,1,2,track,interaction_mode,job_describtion,5,Question 1,Audio,yes,no,sdsdsd,Audio.mp3
-1,1,1,2,track,interaction_mode,job_describtion,6,Question 2,MCQ,yes,no,sdsd,ABC
-2,1,1,2,track,interaction_mode,job_describtion,7,Question 3,Video,yes,no,sd1212sdsd,Video.mp4
-3,1,1,2,track,interaction_mode,job_describtion,8,Question 4,MCQ,yes,no,sd1212sdsd,ABC DEF
-4,2,2,2,track,interaction_mode,job_describtion,5,Question 1,Audio,yes,no,sdsdsd,Audio.mp3
-5,2,2,2,track,interaction_mode,job_describtion,6,Question 2,MCQ,yes,no,sdsd,ABC
-6,2,2,2,track,interaction_mode,job_describtion,7,Question 3,Video,yes,no,sd1212sdsd,Video.mp4
-7,2,2,2,track,interaction_mode,job_describtion,8,Question 4,MCQ,yes,no,sd1212sdsd,ABC DEF

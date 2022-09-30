@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "rest_framework",
     "backend",
-    "django_rest_passwordreset",
+    "django_rest_passwordreset"
 ]
 
 MIDDLEWARE = [

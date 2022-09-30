@@ -1,22 +1,15 @@
-from backend.views import (
-    ChangePasswordView,
-    CreateTestView,
-    InputCSVToAIViewSet,
-    InteractionRatingView,
-    InteractionView,
-    OutputCSVToAIViewSet,
-    ProfileView,
-    ReportView,
-    ReterieveTestView,
-    SingleTestIntrectionView,
-    TeamView,
-    ValidateAccessCode,
-)
 from django.urls import include, path, re_path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from rest_framework_simplejwt import views as jwt_views
+
+from backend.views import (ChangePasswordView, CreateTestView,
+                           InputCSVToAIViewSet, InteractionRatingView,
+                           InteractionView, OutputCSVToAIViewSet, ProfileView,
+                           ReportView, ReterieveTestView,
+                           SingleTestIntrectionView, TeamView,
+                           ValidateAccessCode)
 
 from .api import RegisterApi
 
