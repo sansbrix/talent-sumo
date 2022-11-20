@@ -13,7 +13,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from backend.models import (Candidate, Interaction, Notification, Score, Test,
-                            UserDetail)
+                            UserDetail, Response as ResponseModel, Question
+                            )
 from backend.utils import CreateCSVForInputAI, output_csv_ai
 
 from .serializer import (CandidateSerializer, ChangePasswordSerializer,
@@ -113,7 +114,14 @@ class CreateTestView(APIView, LimitOffsetPagination):
 
     @swagger_auto_schema(responses={200: test_response})
     def get(self, request, *args, **kwargs):
-        instance = Test.objects.filter(createdby=self.request.user)
+        search = self.request.query_params.get("search")
+        if search:
+            instance = Test.objects.filter(
+                Q(job_title=search) | Q(track=search) 
+                # | Q(id=search)
+            ).filter(createdby=request.user.id)
+        else:
+            instance = Test.objects.filter(createdby=self.request.user)
         results = self.paginate_queryset(instance, request, view=self)
         data = TestSerializer(results, many=True).data
         return self.get_paginated_response(data)
@@ -208,9 +216,9 @@ class InteractionView(APIView, LimitOffsetPagination):
         if search:
             obj = Test.objects.filter(
                 Q(job_title=search) | Q(track=search) | Q(id=search)
-            )
+            ).filter(createdby=request.user.id)
         else:
-            obj = Test.objects.all()
+            obj = Test.objects.filter(createdby=request.user.id)
 
         access_codes = obj.values_list("access_code", flat=True)
         candidates = Candidate.objects.filter(access_code__in=access_codes)
@@ -374,3 +382,24 @@ class InteractionRatingView(APIView):
                 )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class FetchAllTestIds(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request, *args, **kwargs):
+        tests = Test.objects.filter(createdby=request.user.id)
+        return Response(data={"data" : tests.values_list("id", flat=True)})
+    
+    
+class GetResponseById(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request, pk, *args, **kwargs):
+        candidate = Candidate.objects.get(id=pk)
+        serializer = CandidateSerializer(instance=candidate)
+        res = ResponseModel.objects.filter(candidate=candidate)
+        data = []
+        for i in res:
+            temp = dict(ResponseSerializer(instance=i).data)
+            # temp["questions"] = QuestionSerializer(instance=Question.objects.get(id=i.question_id)).data
+            data.append(temp)
+        intrection = Test.objects.filter(access_code=candidate.access_code).first()
+        return Response(data={"data" : serializer.data, "responses": data, "intrection": TestSerializer(instance=intrection).data})

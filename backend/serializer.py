@@ -39,14 +39,16 @@ class RegisterSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "invitation_code",
+            "business_invite_code"
         )
         extra_kwargs = {
             "password": {"write_only": True},
+            "business_invite_code": {"write_only": True},
         }
 
     def create(self, validated_data):
         user = User.objects.create_user(
-            validated_data["username"],
+            validated_data["email"],
             password=validated_data["password"],
             first_name=validated_data["first_name"],
             last_name=validated_data["last_name"],
@@ -62,6 +64,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             invite_code=create_user_invite_code(),
             invitation_code=code,
             invitation_code_optional=True if code else False,
+            business_invite_code=validated_data["business_invite_code"]
         )
         return user
 

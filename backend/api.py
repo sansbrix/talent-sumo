@@ -34,7 +34,7 @@ class RegisterApi(generics.GenericAPIView):
                 if not code_exist:
                     return Response(
                         {
-                            "message": "This business invitation code doesn't exist.",
+                            "business_invite_code": ["This business invitation code doesn't exist."],
                             "status": False,
                         },
                         status=status.HTTP_400_BAD_REQUEST,

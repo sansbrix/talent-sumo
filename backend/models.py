@@ -11,7 +11,6 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import strip_tags
 from django_rest_passwordreset.signals import reset_password_token_created
-
 from talentsumo import env
 
 
@@ -25,7 +24,9 @@ class Test(models.Model):
     interaction_mode = models.CharField(max_length=255)  # Interview Mode
     report_type = models.CharField(max_length=255)
     report_type_text = models.CharField(max_length=255, null=True, blank=True)
-    generate_certificate = models.CharField(max_length=255)
+    generate_certificate = models.BooleanField(default=True)
+    report_sent_to_candidate = models.BooleanField(default=True)
+    report_sent_to_email_one = models.CharField(max_length=255, null=True, blank=True)
     generate_certificate_text = models.CharField(max_length=255, null=True, blank=True)
     job_instruction = models.CharField(max_length=255)
     job_describtion = models.CharField(max_length=255)
@@ -52,6 +53,9 @@ class Test(models.Model):
         User, on_delete=models.CASCADE, related_name="test_updated_by"
     )
     is_active = models.BooleanField(default=True)
+    assesment = models.BooleanField(default=False)
+    library = models.BooleanField(default=False)
+    case_text = models.TextField(default=None, null=True)
 
 
 # Notification Model
@@ -67,8 +71,6 @@ class Notification(models.Model):
     interaction_instruction_message = models.CharField(max_length=255)
     interaction_completion_message = models.CharField(max_length=255)
     bot_warning_message = models.CharField(max_length=255)
-    report_send_to_user = models.BooleanField()
-    report_sent_to_email_one = models.CharField(max_length=255, null=True, blank=True)
     report_sent_to_email_two = models.CharField(max_length=255, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

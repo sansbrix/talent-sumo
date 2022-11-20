@@ -9,7 +9,7 @@ from backend.views import (ChangePasswordView, CreateTestView,
                            InteractionView, OutputCSVToAIViewSet, ProfileView,
                            ReportView, ReterieveTestView,
                            SingleTestIntrectionView, TeamView,
-                           ValidateAccessCode)
+                           ValidateAccessCode, FetchAllTestIds, GetResponseById)
 
 from .api import RegisterApi
 
@@ -62,4 +62,6 @@ urlpatterns = [
     path("profile", ProfileView.as_view()),
     path("teams", TeamView.as_view()),
     path("intrection-rating/<str:intrectionId>", InteractionRatingView.as_view()),
+    path("fetch-all-test-ids", FetchAllTestIds.as_view()),
+    path("response/<str:pk>", GetResponseById.as_view())
 ]

@@ -16,7 +16,19 @@ SECRET_KEY = "django-insecure-8r6xcydy@je#dmw^y60qla-tl^o+(r@5xk#48c(z@n14ajr4u-
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+  'accept',
+  'accept-encoding',
+  'authorization',
+  'content-type',
+  'origin',
+  'dnt',
+  'user-agent',
+  'x-csrftoken',
+  'x-requested-with']
+CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 
 # Application definition
 
@@ -27,20 +39,24 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'corsheaders',
     "drf_yasg",
     "rest_framework",
     "backend",
-    "django_rest_passwordreset"
+    "django_rest_passwordreset",
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "backend.middleware.CorsMiddleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    
 ]
 
 ROOT_URLCONF = "talentsumo.urls"
