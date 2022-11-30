@@ -11,7 +11,6 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.html import strip_tags
 from django_rest_passwordreset.signals import reset_password_token_created
-from talentsumo import env
 
 
 # Test Model
